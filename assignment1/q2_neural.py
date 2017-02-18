@@ -17,7 +17,7 @@ def forward_backward_prop(data, labels, params, dimensions):
     ofs = 0
     Dx, H, Dy = (dimensions[0], dimensions[1], dimensions[2])
 
-    W1 = np.reshape(params[ofs:ofs+ Dx * H], (Dx, H))
+    W1 = np.reshape(params[ofs:ofs + Dx * H], (Dx, H))
     ofs += Dx * H
     b1 = np.reshape(params[ofs:ofs + H], (1, H))
     ofs += H
@@ -26,7 +26,11 @@ def forward_backward_prop(data, labels, params, dimensions):
     b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
 
     ### YOUR CODE HERE: forward propagation
-    raise NotImplementedError
+    sigmoid = lambda x: 1. / (1 + np.exp(-x))
+
+    hidden = sigmoid(np.dot(data, W1) + b1)
+    scores = np.dot(hidden, W2) + b2
+    probs = softmax(scores)
     ### END YOUR CODE
     
     ### YOUR CODE HERE: backward propagation

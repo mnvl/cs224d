@@ -21,7 +21,14 @@ def softmax(x):
     """
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    if len(x.shape) == 1:
+        x -= np.max(x)
+        x = np.exp(x)
+        x /= np.sum(x)
+    else:
+        x -= np.max(x, axis=1, keepdims=True)
+        x = np.exp(x)
+        x /= np.sum(x, axis=1, keepdims=True)
     ### END YOUR CODE
     
     return x
@@ -58,7 +65,9 @@ def test_softmax():
     """
     print "Running your tests..."
     ### YOUR CODE HERE
-    raise NotImplementedError
+    test1 = softmax(np.array([[1, 1]]))
+    print test1
+    assert np.amax(np.fabs(test1 - np.array([[0.5, 0.5]]))) <= 1e-6
     ### END YOUR CODE  
 
 if __name__ == "__main__":
