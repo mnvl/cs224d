@@ -29,48 +29,40 @@ def forward_backward_prop(data, labels, params, dimensions):
     H1 = np.dot(data, W1) + b1
     A1 = sigmoid(H1)
 
-    cost = np.sum(A1)
+    H2 = np.dot(A1, W2) + b2
+    A2 = H2
 
-    # hidden = sigmoid(np.dot(data, W1) + b1)
-    # scores = np.dot(hidden, W2) + b2
-    # probs = softmax(scores)
-    # cost = -np.sum(labels * np.log(probs)) / labels.shape[0]
+    probs = softmax(A2)
+    cost = -np.sum(labels * np.log(probs)) / labels.shape[0]
     ### END YOUR CODE
 
     ### YOUR CODE HERE: backward propagation
-    dcost_dA1 = np.ones(shape = A1.shape)
+    dcost_dA2 = probs.copy()
+    dcost_dA2 -= labels
+    dcost_dA2 /= labels.shape[0]
+
+    dcost_dH2 = dcost_dA2
+
+    dH2_dA1 = W2
+    dH2_dW2 = A1
+    dH2_db2 = np.ones(shape = (A1.shape[0], 1))
+
+    gradW2 = np.dot(dcost_dH2.T, dH2_dW2).T
+    gradb2 = np.dot(dcost_dH2.T, dH2_db2).T
+
+    dcost_dA1 = np.dot(dcost_dH2, dH2_dA1.T)
+    assert dcost_dA1.shape == A1.shape, str(dcost_dA1.shape) + " != " + str(dH2_dA1.shape)
 
     dA1_dH1 = sigmoid_grad(A1)
-
     dcost_dH1 = dcost_dA1 * dA1_dH1
-    assert dcost_dH1.shape == H1.shape
+    assert dcost_dH1.shape == H1.shape, str(dcost_dH1.shape) + " != " + str(H1.shape)
 
+    dH1_ddata = W1
     dH1_dW1 = data
     dH1_db1 = np.ones(shape = (data.shape[0], 1))
 
     gradW1 = np.dot(dcost_dH1.T, dH1_dW1).T
     gradb1 = np.dot(dcost_dH1.T, dH1_db1).T
-
-    # dL_dscores = probs.copy()
-    # dL_dscores -= labels
-    # dL_dscores /= labels.shape[0]
-
-    # dscores_dW2 = hidden
-    # dscores_dhidden = W2
-
-    # gradW2 = np.dot(dL_dscores.T, dscores_dW2).T
-    # gradb2 = np.sum(dL_dscores, axis = 0).reshape(1, -1)
-
-    # dL_dhidden = np.dot(dscores_dhidden, dL_dscores.T)
-
-    # dhidden_dW1 = np.dot(sigmoid_grad(hidden), W1.T)
-    # dhidden_db1 = sigmoid_grad(hidden)
-
-    # gradW1 = np.dot(dL_dhidden, dhidden_dW1).T
-    # gradb1 = np.sum(np.dot(dL_dhidden, dhidden_db1), axis = 1).reshape(1, -1)
-
-    gradW2 = W2 * 0.
-    gradb2 = b2 * 0.
 
     assert gradW1.shape == W1.shape, str(gradW1.shape) + " != " + str(W1.shape)
     assert gradb1.shape == b1.shape, str(gradb1.shape) + " != " + str(b1.shape)
