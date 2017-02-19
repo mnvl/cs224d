@@ -36,7 +36,7 @@ def gradcheck_naive(f, x):
 
         numgrad = (fx1 - fx2) / (2. * h)
 
-        x[ix] -= old
+        x[ix] = old
         ### END YOUR CODE
 
         # Compare gradients

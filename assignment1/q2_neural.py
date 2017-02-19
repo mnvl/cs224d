@@ -113,18 +113,12 @@ def your_sanity_checks():
     """
     print "Running your sanity checks..."
     ### YOUR CODE HERE
-    # for i in range(10):
-    #   data = np.random.randn(1, 1)
-    #   labels = np.array([[1, 0]])
-    #   dims = [1, 1, 2]
-    #   params = np.random.randn((dims[0] + 1) * dims[1] + (dims[1] + 1) * dims[2])
-    #   gradcheck_naive(lambda params: forward_backward_prop(data, labels, params, dims), params)
-
-    data = np.array([[3, -1], [2, 1]])
-    labels = np.array([[0, 1], [1, 0]])
-    dims = [2, 3, 2]
-    params = np.linspace(0, 1, (dims[0] + 1) * dims[1] + (dims[1] + 1) * dims[2])
-    gradcheck_naive(lambda params: forward_backward_prop(data, labels, params, dims), params)
+    for i in range(10):
+       data = np.random.randn(1, 1)
+       labels = np.array([[1, 0]])
+       dims = [1, 1, 2]
+       params = np.random.randn((dims[0] + 1) * dims[1] + (dims[1] + 1) * dims[2])
+       gradcheck_naive(lambda params: forward_backward_prop(data, labels, params, dims), params)
     ### END YOUR CODE
 
 if __name__ == "__main__":
