@@ -33,14 +33,28 @@ def forward_backward_prop(data, labels, params, dimensions):
     ### END YOUR CODE
     
     ### YOUR CODE HERE: backward propagation
-    dloss = scores.copy()
-    dloss -= labels
-    dloss /= labels.shape[0]
+    dL_dscores = scores.copy()
+    dL_dscores -= labels
+    dL_dscores /= labels.shape[0]
 
-    gradW2 = np.dot(dloss, W2.T)
-    gradb2 = np.sum(dloss, axis = 1)
+    dscores_dW2 = hidden
+    dscores_dhidden = W2
 
+    gradW2 = np.dot(dscores_dW2.T, dL_dscores)
+    gradb2 = np.sum(dL_dscores, axis = 0).reshape(1, -1)
 
+    dL_dhidden = np.dot(dscores_dhidden, dL_dscores.T)
+
+    dhidden_dW1 = np.dot(sigmoid_grad(hidden), W1.T)
+    dhidden_db1 = sigmoid_grad(hidden)
+
+    gradW1 = np.dot(dL_dhidden, dhidden_dW1).T
+    gradb1 = np.sum(np.dot(dL_dhidden, dhidden_db1), axis = 1).reshape(1, -1)
+
+    assert gradW1.shape == W1.shape, str(gradW1.shape) + " != " + str(W1.shape)
+    assert gradb1.shape == b1.shape, str(gradb1.shape) + " != " + str(b1.shape)
+    assert gradW2.shape == W2.shape, str(gradW2.shape) + " != " + str(W2.shape)
+    assert gradb2.shape == b2.shape, str(gradb2.shape) + " != " + str(b2.shape)
     ### END YOUR CODE
     
     ### Stack gradients (do not modify)
@@ -78,7 +92,8 @@ def your_sanity_checks():
     """
     print "Running your sanity checks..."
     ### YOUR CODE HERE
-    raise NotImplementedError
+
+
     ### END YOUR CODE
 
 if __name__ == "__main__":
