@@ -26,30 +26,51 @@ def forward_backward_prop(data, labels, params, dimensions):
     b2 = np.reshape(params[ofs:ofs + Dy], (1, Dy))
 
     ### YOUR CODE HERE: forward propagation
-    hidden = sigmoid(np.dot(data, W1) + b1)
-    scores = np.dot(hidden, W2) + b2
-    probs = softmax(scores)
-    cost = -np.sum(labels * np.log(probs)) / labels.shape[0]
+    H1 = np.dot(data, W1) + b1
+    A1 = sigmoid(H1)
+
+    cost = np.sum(A1)
+
+    # hidden = sigmoid(np.dot(data, W1) + b1)
+    # scores = np.dot(hidden, W2) + b2
+    # probs = softmax(scores)
+    # cost = -np.sum(labels * np.log(probs)) / labels.shape[0]
     ### END YOUR CODE
 
     ### YOUR CODE HERE: backward propagation
-    dL_dscores = probs.copy()
-    dL_dscores -= labels
-    dL_dscores /= labels.shape[0]
+    dcost_dA1 = np.ones(shape = A1.shape)
 
-    dscores_dW2 = hidden
-    dscores_dhidden = W2
+    dA1_dH1 = sigmoid_grad(A1)
 
-    gradW2 = np.dot(dL_dscores.T, dscores_dW2).T
-    gradb2 = np.sum(dL_dscores, axis = 0).reshape(1, -1)
+    dcost_dH1 = dcost_dA1 * dA1_dH1
+    assert dcost_dH1.shape == H1.shape
 
-    dL_dhidden = np.dot(dscores_dhidden, dL_dscores.T)
+    dH1_dW1 = data
+    dH1_db1 = np.ones(shape = (data.shape[0], 1))
 
-    dhidden_dW1 = np.dot(sigmoid_grad(hidden), W1.T)
-    dhidden_db1 = sigmoid_grad(hidden)
+    gradW1 = np.dot(dcost_dH1.T, dH1_dW1).T
+    gradb1 = np.dot(dcost_dH1.T, dH1_db1).T
 
-    gradW1 = np.dot(dL_dhidden, dhidden_dW1).T
-    gradb1 = np.sum(np.dot(dL_dhidden, dhidden_db1), axis = 1).reshape(1, -1)
+    # dL_dscores = probs.copy()
+    # dL_dscores -= labels
+    # dL_dscores /= labels.shape[0]
+
+    # dscores_dW2 = hidden
+    # dscores_dhidden = W2
+
+    # gradW2 = np.dot(dL_dscores.T, dscores_dW2).T
+    # gradb2 = np.sum(dL_dscores, axis = 0).reshape(1, -1)
+
+    # dL_dhidden = np.dot(dscores_dhidden, dL_dscores.T)
+
+    # dhidden_dW1 = np.dot(sigmoid_grad(hidden), W1.T)
+    # dhidden_db1 = sigmoid_grad(hidden)
+
+    # gradW1 = np.dot(dL_dhidden, dhidden_dW1).T
+    # gradb1 = np.sum(np.dot(dL_dhidden, dhidden_db1), axis = 1).reshape(1, -1)
+
+    gradW2 = W2 * 0.
+    gradb2 = b2 * 0.
 
     assert gradW1.shape == W1.shape, str(gradW1.shape) + " != " + str(W1.shape)
     assert gradb1.shape == b1.shape, str(gradb1.shape) + " != " + str(b1.shape)
@@ -92,9 +113,16 @@ def your_sanity_checks():
     """
     print "Running your sanity checks..."
     ### YOUR CODE HERE
-    data = np.array([[1, -1, 2, -2]])
-    labels = np.array([[0, 1]])
-    dims = [4, 3, 2]
+    # for i in range(10):
+    #   data = np.random.randn(1, 1)
+    #   labels = np.array([[1, 0]])
+    #   dims = [1, 1, 2]
+    #   params = np.random.randn((dims[0] + 1) * dims[1] + (dims[1] + 1) * dims[2])
+    #   gradcheck_naive(lambda params: forward_backward_prop(data, labels, params, dims), params)
+
+    data = np.array([[3, -1], [2, 1]])
+    labels = np.array([[0, 1], [1, 0]])
+    dims = [2, 3, 2]
     params = np.linspace(0, 1, (dims[0] + 1) * dims[1] + (dims[1] + 1) * dims[2])
     gradcheck_naive(lambda params: forward_backward_prop(data, labels, params, dims), params)
     ### END YOUR CODE

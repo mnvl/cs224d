@@ -12,7 +12,7 @@ def gradcheck_naive(f, x):
     rndstate = random.getstate()
     random.setstate(rndstate)  
     fx, grad = f(x) # Evaluate function value at original point
-    h = 1e-6
+    h = 1e-3
 
     # Iterate over all indexes in x
     it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
@@ -48,8 +48,7 @@ def gradcheck_naive(f, x):
 
         it.iternext() # Step to next dimension
 
-    if passed:
-      print 'Gradient check passed.'
+    print 'Gradient check %s.' % (passed and 'passed' or 'failed')
 
 def sanity_check():
     """
@@ -72,12 +71,8 @@ def your_sanity_checks():
     """
     print "Running your sanity checks..."
     ### YOUR CODE HERE
-    cube = lambda x: (np.sum(x ** 3), 3 * x ** 2)
-
-    print "Gradient checks for a bawl..."
-    gradcheck_naive(cube, np.array(12.34))
-    gradcheck_naive(cube, np.random.randn(3, ))
-    gradcheck_naive(cube, np.random.randn(3, 2))
+    f = lambda x: (x[:,0] * 2 + x[:,1] * 3 + x[:, 2] * 5, np.array([[2, 3, 5]]))
+    gradcheck_naive(f, np.random.randn(1, 3))
     ### END YOUR CODE
 
 if __name__ == "__main__":
