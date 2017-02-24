@@ -67,19 +67,19 @@ def test_softmaxCostAndGradient():
   D = 3
   N = 4
 
-  predicted = np.linspace(0, 1, D)
+  predicted = np.linspace(0.2, 1, D)
   target = 2
-  outputVectors = np.linspace(0, 100, N * D).reshape(-1, D)
+  outputVectors = np.linspace(0.2, 1, N * D).reshape(-1, D)
 
   (cost, gradPred, grad) = softmaxCostAndGradient(predicted, target, outputVectors, None)
 
   assert (cost - 202.02020202) < 1e-6, cost
-  assert np.amax(np.fabs(gradPred - np.array([27.2727272] * D))) < 1e-6, gradPred
+  assert np.amax(np.fabs(gradPred - np.array([-0.00640406] * D))) < 1e-6, gradPred
   assert np.amax(np.fabs(grad - np.array(
-    [[  0.00000000e+00,  2.50722136e-54,  5.01444273e-54],
-     [  0.00000000e+00,  1.46482290e-36,  2.92964580e-36],
-     [ -0.00000000e+00, -5.00000000e-01, -1.00000000e+00],
-     [  0.00000000e+00,  5.00000000e-01,  1.00000000e+00]]))) < 1e-6, grad
+    [[ 0.02524334,  0.07573003,  0.12621672],
+     [ 0.03738576,  0.11215727,  0.18692878],
+     [-0.14463116, -0.43389347, -0.72315578],
+     [ 0.08200206,  0.24600617,  0.41001028]]))) < 1e-6, grad
 
 def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
     K=10):
