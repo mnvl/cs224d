@@ -20,7 +20,7 @@ def test_normalize_rows():
     x = normalizeRows(np.array([[3.0,4.0],[1, 2]]))
     # the result should be [[0.6, 0.8], [0.4472, 0.8944]]
     assert (np.abs(x - np.array([[0.6, 0.8], [0.4472, 0.8944]])) < 1e-3).all()
-    print ""
+    print
 
 def softmaxCostAndGradient(predicted, target, outputVectors, dataset):
     """ Softmax cost function for word2vec models """
@@ -64,6 +64,8 @@ def softmaxCostAndGradient(predicted, target, outputVectors, dataset):
     return cost, gradPred, grad
 
 def test_softmaxCostAndGradient():
+  print "Testing softmax cost and gradient..."
+
   D = 3
   N = 4
 
@@ -80,6 +82,8 @@ def test_softmaxCostAndGradient():
      [ 0.03738576,  0.11215727,  0.18692878],
      [-0.14463116, -0.43389347, -0.72315578],
      [ 0.08200206,  0.24600617,  0.41001028]]))) < 1e-6, grad
+
+  print
 
 def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
     K=10):
@@ -104,6 +108,31 @@ def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
 
     return cost, gradPred, grad
 
+def test_negSamplingCostAndGradient(dataset):
+  print "Testing negative sampling cost and gradient..."
+
+  random.seed(1)
+  np.random.seed(1)
+
+  D = 3
+  N = 5
+
+  predicted = np.linspace(0.2, 1, D)
+  target = 2
+  outputVectors = np.linspace(0.2, 1, N * D).reshape(-1, D)
+
+  (cost, gradPred, grad) = negSamplingCostAndGradient(predicted, target, outputVectors, dataset)
+
+  assert (cost - 14.8025361347) < 1e-6, cost
+  assert np.amax(np.fabs(gradPred - np.array([ 4.31425363, 4.72879439, 5.14333514]))) < 1e-6, gradPred
+  assert np.amax(np.fabs(grad - np.array(
+    [[ 0.37468291,  1.12404874,  1.87341457],
+     [ 0.13872590,  0.41617771,  0.69362951],
+     [-0.04899058, -0.14697173, -0.24495288],
+     [ 0.64605456,  1.93816368,  3.23027281],
+     [ 0.34041984,  1.02125953,  1.70209922]]))) < 1e-6, grad
+
+  print
 
 def skipgram(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
     dataset, word2vecCostAndGradient = softmaxCostAndGradient):
@@ -202,6 +231,7 @@ def test_word2vec():
     dataset.getRandomContext = getRandomContext
 
     test_softmaxCostAndGradient()
+    test_negSamplingCostAndGradient(dataset)
 
     random.seed(31415)
     np.random.seed(9265)
