@@ -49,10 +49,37 @@ def softmaxCostAndGradient(predicted, target, outputVectors, dataset):
     # assignment!
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    yhat = softmax(np.dot(outputVectors, predicted))
+
+    cost = -np.log(yhat[target])
+
+    yhat_y = yhat.copy()
+    yhat_y[target] -= 1
+
+    gradPred = np.dot(yhat_y, outputVectors)
+
+    grad = yhat_y[:, np.newaxis] * np.tile(predicted, (yhat_y.shape[0], 1))
     ### END YOUR CODE
 
     return cost, gradPred, grad
+
+def test_softmaxCostAndGradient():
+  D = 3
+  N = 4
+
+  predicted = np.linspace(0, 1, D)
+  target = 2
+  outputVectors = np.linspace(0, 100, N * D).reshape(-1, D)
+
+  (cost, gradPred, grad) = softmaxCostAndGradient(predicted, target, outputVectors, None)
+
+  assert (cost - 202.02020202) < 1e-6, cost
+  assert np.amax(np.fabs(gradPred - np.array([27.2727272] * D))) < 1e-6, gradPred
+  assert np.amax(np.fabs(grad - np.array(
+    [[  0.00000000e+00,  2.50722136e-54,  5.01444273e-54],
+     [  0.00000000e+00,  1.46482290e-36,  2.92964580e-36],
+     [ -0.00000000e+00, -5.00000000e-01, -1.00000000e+00],
+     [  0.00000000e+00,  5.00000000e-01,  1.00000000e+00]]))) < 1e-6, grad
 
 def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
     K=10):
@@ -170,10 +197,11 @@ def test_word2vec():
 
     def getRandomContext(C):
         tokens = ["a", "b", "c", "d", "e"]
-        return tokens[random.randint(0,4)], [tokens[random.randint(0,4)] \
-           for i in xrange(2*C)]
+        return tokens[random.randint(0,4)], [tokens[random.randint(0,4)] for i in xrange(2*C)]
     dataset.sampleTokenIdx = dummySampleTokenIdx
     dataset.getRandomContext = getRandomContext
+
+    test_softmaxCostAndGradient()
 
     random.seed(31415)
     np.random.seed(9265)
