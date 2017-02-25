@@ -105,13 +105,14 @@ def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
     ### YOUR CODE HERE
     D = predicted.shape[0]
 
-    randomVectors = np.zeros((K, D))
+    randomTokens = np.zeros(K, dtype = np.uint32)
     for i in range(K):
       token_index = dataset.sampleTokenIdx()
       while token_index == target:
         token_index = dataset.sampleTokenIdx()
+      randomTokens[i] = token_index
 
-      randomVectors[i, :] = outputVectors[token_index, :]
+    randomVectors = outputVectors[randomTokens, :]
 
     cost = -np.log(sigmoid(np.dot(outputVectors[target], predicted))) - \
            np.sum(np.log(sigmoid(-np.dot(randomVectors, predicted))))
@@ -119,7 +120,10 @@ def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
     gradPred = -(1. - sigmoid(np.dot(outputVectors[target], predicted))) * outputVectors[target] + \
                np.sum((1. - sigmoid(-np.dot(randomVectors, predicted)))[:, np.newaxis] * randomVectors, axis = 0)
 
-    grad = 0
+    grad = np.zeros_like(outputVectors)
+    grad[target, :] = -(1. - sigmoid(np.dot(outputVectors[target], predicted))) * predicted
+    np.add.at(grad, randomTokens, (1. - sigmoid(-np.dot(randomVectors, predicted)))[:, np.newaxis] * predicted)
+
     ### END YOUR CODE
 
     return cost, gradPred, grad
