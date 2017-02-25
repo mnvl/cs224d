@@ -20,7 +20,7 @@ def test_normalize_rows():
     x = normalizeRows(np.array([[3.0,4.0],[1, 2]]))
     # the result should be [[0.6, 0.8], [0.4472, 0.8944]]
     assert (np.abs(x - np.array([[0.6, 0.8], [0.4472, 0.8944]])) < 1e-3).all()
-    print
+    print "OK"
 
 def softmaxCostAndGradient(predicted, target, outputVectors, dataset):
     """ Softmax cost function for word2vec models """
@@ -83,7 +83,7 @@ def test_softmaxCostAndGradient():
      [-0.14463116, -0.43389347, -0.72315578],
      [ 0.08200206,  0.24600617,  0.41001028]]))) < 1e-6, grad
 
-  print
+  print "OK"
 
 def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
     K=10):
@@ -152,7 +152,7 @@ def test_negSamplingCostAndGradient(dataset):
      [ 0.64605456,  1.93816368,  3.23027281],
      [ 0.34041984,  1.02125953,  1.70209922]]))) < 1e-6, grad
 
-  print
+  print "OK"
 
 def skipgram(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
     dataset, word2vecCostAndGradient = softmaxCostAndGradient):
@@ -181,7 +181,11 @@ def skipgram(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
     # assignment!
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    (N, D) = inputVectors.shape
+
+    target = tokens[currentWord]
+    gradIn = np.zeros((N, D))
+    (cost, gradIn[target], gradOut) = softmaxCostAndGradient(inputVectors[target], target, outputVectors, None)
     ### END YOUR CODE
 
     return cost, gradIn, gradOut
