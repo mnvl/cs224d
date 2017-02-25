@@ -103,7 +103,21 @@ def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
     # assignment!
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    D = predicted.shape[0]
+
+    randomVectors = np.zeros((K, D))
+    for i in range(K):
+      token_index = dataset.sampleTokenIdx()
+      while token_index == target:
+        token_index = dataset.sampleTokenIdx()
+
+      randomVectors[i, :] = outputVectors[token_index, :]
+
+    cost = -np.log(sigmoid(np.dot(outputVectors[target], predicted))) - np.sum(np.log(sigmoid(-np.dot(randomVectors, predicted))))
+
+    gradPred = 0
+
+    grad = 0
     ### END YOUR CODE
 
     return cost, gradPred, grad
@@ -223,7 +237,6 @@ def test_word2vec():
     dataset = type('dummy', (), {})()
     def dummySampleTokenIdx():
         return random.randint(0, 4)
-
     def getRandomContext(C):
         tokens = ["a", "b", "c", "d", "e"]
         return tokens[random.randint(0,4)], [tokens[random.randint(0,4)] for i in xrange(2*C)]
