@@ -185,7 +185,7 @@ def skipgram(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
 
     target = tokens[currentWord]
     gradIn = np.zeros((N, D))
-    (cost, gradIn[target], gradOut) = softmaxCostAndGradient(inputVectors[target], target, outputVectors, None)
+    (cost, gradIn[target], gradOut) = word2vecCostAndGradient(inputVectors[target], target, outputVectors, dataset)
     ### END YOUR CODE
 
     return cost, gradIn, gradOut
@@ -205,12 +205,12 @@ def cbow(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
     # ASSIGNMENT ARE NOT!                                           #
     #################################################################
 
-    cost = 0
-    gradIn = np.zeros(inputVectors.shape)
-    gradOut = np.zeros(outputVectors.shape)
-
     ### YOUR CODE HERE
-    raise NotImplementedError
+    (N, D) = inputVectors.shape
+
+    target = tokens[currentWord]
+    gradOut = np.zeros((N, D))
+    (cost, gradOut[target], gradIn) = word2vecCostAndGradient(outputVectors[target], target, inputVectors, dataset)
     ### END YOUR CODE
 
     return cost, gradIn, gradOut
