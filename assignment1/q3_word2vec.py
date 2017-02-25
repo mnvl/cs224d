@@ -185,8 +185,7 @@ def skipgram(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
 
     target_index = tokens[currentWord]
 
-    assert len(contextWords) == 2*C
-    context_indices = np.zeros(2*C, dtype = np.uint32)
+    context_indices = np.zeros(len(contextWords), dtype = np.uint32)
     for i, w in enumerate(contextWords): context_indices[i] = tokens[w]
 
     v = inputVectors[context_indices, :]
