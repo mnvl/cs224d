@@ -75,7 +75,8 @@ def sgd(f, x0, step, iterations, postprocessing = None, useSaved = False, PRINT_
 
         cost = None
         ### YOUR CODE HERE
-        raise NotImplementedError
+        (cost, grad) = f(x)
+        x = postprocessing(x - step * grad)
         ### END YOUR CODE
 
         if iter % PRINT_EVERY == 0:
@@ -120,7 +121,20 @@ def your_sanity_checks():
     """
     print "Running your sanity checks..."
     ### YOUR CODE HERE
-    raise NotImplementedError
+    quad = lambda x: (np.sum((x - 10.) ** 2), 2. * (x - 10.))
+
+    print "Running sanity checks..."
+    t1 = sgd(quad, 0.5, 0.01, 1000, PRINT_EVERY=100)
+    print "test 1 result:", t1
+    assert abs(t1 - 10.) <= 1e-6
+
+    t2 = sgd(quad, 0.0, 0.001, 10000, PRINT_EVERY=1000)
+    print "test 2 result:", t2
+    assert abs(t2 - 10.) <= 1e-6
+
+    t3 = sgd(quad, -1.5, 0.001, 10000, PRINT_EVERY=1000)
+    print "test 3 result:", t3
+    assert abs(t3 - 10.) <= 1e-6
     ### END YOUR CODE
 
 if __name__ == "__main__":
