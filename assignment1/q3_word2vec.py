@@ -183,9 +183,25 @@ def skipgram(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
     ### YOUR CODE HERE
     (N, D) = inputVectors.shape
 
-    target = tokens[currentWord]
-    gradIn = np.zeros((N, D))
-    (cost, gradIn[target], gradOut) = word2vecCostAndGradient(inputVectors[target], target, outputVectors, dataset)
+    target_index = tokens[currentWord]
+
+    assert len(contextWords) == 2*C
+    context_indices = np.zeros(2*C, dtype = np.uint32)
+    for i, w in enumerate(contextWords): context_indices[i] = tokens[w]
+
+    v = inputVectors[context_indices, :]
+
+    cost = 0.
+    gradIn = np.zeros_like(inputVectors)
+    gradOut = np.zeros_like(outputVectors)
+
+    for j in context_indices:
+      (c, gout, gin) = word2vecCostAndGradient(outputVectors[j], target_index, inputVectors, dataset)
+
+      cost += c
+      gradIn += gin
+      gradOut[j, :] += gout
+
     ### END YOUR CODE
 
     return cost, gradIn, gradOut
@@ -208,9 +224,21 @@ def cbow(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
     ### YOUR CODE HERE
     (N, D) = inputVectors.shape
 
-    target = tokens[currentWord]
-    gradOut = np.zeros((N, D))
-    (cost, gradOut[target], gradIn) = word2vecCostAndGradient(outputVectors[target], target, inputVectors, dataset)
+    target_index = tokens[currentWord]
+
+    assert len(contextWords) == 2*C
+    context_indices = np.zeros(2*C, dtype = np.uint32)
+    for i, w in enumerate(contextWords): context_indices[i] = tokens[w]
+
+    v = inputVectors[context_indices, :]
+
+    vhat = np.mean(v, axis = 0)
+
+    (cost, gin, gradOut) = word2vecCostAndGradient(vhat, target_index, outputVectors, dataset)
+
+    gradIn = np.zeros_like(inputVectors)
+    np.add.at(gradIn, context_indices, gin / (2*C))
+
     ### END YOUR CODE
 
     return cost, gradIn, gradOut
