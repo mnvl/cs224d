@@ -9,7 +9,7 @@ from utils import calculate_perplexity, get_ptb_dataset, Vocab
 from utils import ptb_iterator, sample
 
 import tensorflow as tf
-from tensorflow.python.ops.seq2seq import sequence_loss
+from tensorflow.contrib.seq2seq import sequence_loss
 from model import LanguageModel
 
 # Let's set the parameters of our model
@@ -146,7 +146,7 @@ class RNNLM_Model(LanguageModel):
       loss: A 0-d tensor (scalar)
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    loss = sequence_loss(output, self.labels_placeholder)
     ### END YOUR CODE
     return loss
 
@@ -170,7 +170,7 @@ class RNNLM_Model(LanguageModel):
       train_op: The Op for training.
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    train_op = tf.train.AdamOptimizer(self.config.lr).minimize(loss)
     ### END YOUR CODE
     return train_op
 
@@ -232,7 +232,24 @@ class RNNLM_Model(LanguageModel):
                a tensor of shape (batch_size, hidden_size)
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    self.initial_state = tf.get_variable("initial_state",
+                                         (self.config.batch_size, self.config.hidden_size),
+                                         initializer = tf.zeros_initializer())
+
+    H = tf.get_variable("H", (self.config.hidden_size, self.config.hidden_size))
+    I = tf.get_variable("I", (self.config.embed_size, self.config.hidden_size))
+    b_1 = tf.get_variable("b_1", (self.config.hidden_size,))
+
+    ht_prev = self.initial_state
+    rnn_outputs = [None] * self.config.num_steps
+
+    for t in range(self.config.num_steps):
+      et = inputs[t]
+      ht = tf.sigmoid(tf.matmul(H, ht_prev) + tf.matmul(I, et) + b_1)
+      rnn_outputs[t] = ht
+
+      ht_prev = ht
+
     ### END YOUR CODE
     return rnn_outputs
 
