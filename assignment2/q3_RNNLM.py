@@ -103,7 +103,9 @@ class RNNLM_Model(LanguageModel):
     # The embedding lookup is currently only implemented for the CPU
     with tf.device('/cpu:0'):
       ### YOUR CODE HERE
-      raise NotImplementedError
+      word_embeddings = tf.get_variable("word_embeddings", (len(self.vocab), self.config.embed_size), tf.float32)
+      inputs = tf.nn.embedding_lookup(word_embeddings, self.input_placeholder)
+      inputs = [tf.squeeze(x, axis = 1) for x in tf.split(inputs, self.config.num_steps, axis = 1)]
       ### END YOUR CODE
       return inputs
 
@@ -127,7 +129,9 @@ class RNNLM_Model(LanguageModel):
                (batch_size, len(vocab)
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    U = tf.get_variable("U", (self.config.hidden_size, len(self.vocab)), tf.float32)
+    b_2 = tf.get_variable("b_2", (len(self.vocab), ), tf.float32)
+    outputs = [(tf.matmul(U, x) + b_2) for x in rnn_outputs]
     ### END YOUR CODE
     return outputs
 
