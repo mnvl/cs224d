@@ -3,7 +3,7 @@ import tensorflow as tf
 
 def xavier_weight_init():
   """
-  Returns function that creates random tensor. 
+  Returns function that creates random tensor.
 
   The specified function will take in a shape (tuple or 1-d array) and must
   return a random tensor of the specified shape and must be drawn from the
@@ -24,7 +24,8 @@ def xavier_weight_init():
       out: tf.Tensor of specified shape sampled from Xavier distribution.
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    r = np.sqrt(6. / np.sum(shape))
+    out = tf.random_uniform(shape, -r, r)
     ### END YOUR CODE
     return out
   # Returns defined initializer function.
@@ -46,16 +47,23 @@ def test_initialization_basic():
   print "Basic (non-exhaustive) Xavier initialization tests pass\n"
 
 def test_initialization():
-  """ 
+  """
   Use this space to test your Xavier initialization code by running:
-      python q1_initialization.py 
+      python q1_initialization.py
   This function will not be called by the autograder, nor will
   your tests be graded.
   """
   print "Running your tests..."
   ### YOUR CODE HERE
-  raise NotImplementedError
-  ### END YOUR CODE  
+  shape = (100, 200)
+  xavier_initializer = xavier_weight_init()
+  xavier_mat = xavier_initializer(shape)
+  assert xavier_mat.get_shape() == shape
+  with tf.Session().as_default():
+    xavier_mat = xavier_mat.eval()
+  assert np.mean(xavier_mat) < 1e-3
+  ### END YOUR CODE
 
 if __name__ == "__main__":
     test_initialization_basic()
+    test_initialization()
