@@ -121,9 +121,9 @@ class NERModel(LanguageModel):
     ### YOUR CODE HERE
     feed_dict = {
       self.input_placeholder: input_batch,
-      self.labels_placeholder: label_batch,
-      self.dropout_placeholder: dropout,
+      self.dropout_placeholder: dropout
     }
+    if label_batch is not None: feed_dict[self.labels_placeholder] = label_batch
     ### END YOUR CODE
     return feed_dict
 
@@ -195,8 +195,8 @@ class NERModel(LanguageModel):
       self.U = tf.get_variable("U", (self.config.hidden_size, self.config.label_size), tf.float32)
       self.b2 = tf.get_variable("b2", (self.config.label_size,), tf.float32)
 
-    hidden = tf.nn.tanh(tf.matmul(tf.to_float(window), self.W) + self.b1)
-    output = tf.matmul(hidden, self.U) + self.b2
+    hidden = tf.nn.tanh(tf.matmul(tf.to_float(window), tf.nn.dropout(self.W, self.dropout_placeholder)) + self.b1)
+    output = tf.matmul(hidden, tf.nn.dropout(self.U, self.dropout_placeholder)) + self.b2
     ### END YOUR CODE
     return output
 
