@@ -146,10 +146,9 @@ class RNNLM_Model(LanguageModel):
       loss: A 0-d tensor (scalar)
     """
     ### YOUR CODE HERE
-    with tf.variable_scope('loss', reuse = None) as scope:
-      weights = tf.ones((self.config.batch_size, len(self.vocab)))
-      output = tf.reshape(output, (self.config.batch_size, self.config.num_steps, len(self.vocab)))
-      loss = sequence_loss(output, self.labels_placeholder, weights)
+    weights = tf.ones((self.config.batch_size, len(self.vocab)))
+    output = tf.reshape(output, (self.config.batch_size, self.config.num_steps, len(self.vocab)))
+    loss = sequence_loss(output, self.labels_placeholder, weights)
     ### END YOUR CODE
     return loss
 
@@ -173,8 +172,7 @@ class RNNLM_Model(LanguageModel):
       train_op: The Op for training.
     """
     ### YOUR CODE HERE
-    with tf.variable_scope('loss', reuse = None) as scope:
-      train_op = tf.train.AdamOptimizer(self.config.lr).minimize(loss)
+    train_op = tf.train.AdamOptimizer(self.config.lr).minimize(loss)
     ### END YOUR CODE
     return train_op
 
