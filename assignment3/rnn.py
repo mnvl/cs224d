@@ -67,14 +67,20 @@ class RNN_Model():
         Hint: Use a variable_scope "Composition" for the composition layer, and
               "Projection") for the linear transformations preceding the softmax.
         '''
+        (vocab_size, embed_size, output_size) = (len(self.vocab), self.config.embed_size, self.config.label_size)
+
         with tf.variable_scope('Composition'):
-            ### YOUR CODE HERE
-            pass
-            ### END YOUR CODE
+          ### YOUR CODE HERE
+          self.embedding = tf.get_variable("embedding", (vocab_size, embed_size), tf.float32)
+          self.W1 = tf.get_variable("W1", (2 * embed_size, embed_size), tf.float32)
+          self.b1 = tf.get_variable("b1", (1, embed_size))
+          ### YOUR CODE HERE
+
         with tf.variable_scope('Projection'):
-            ### YOUR CODE HERE
-            pass
-            ### END YOUR CODE
+          ### YOUR CODE HERE
+          self.U = tf.get_variable("U", (embed_size, output_size), tf.float32)
+          self.bs = tf.get_variable("bs", (1, output_size), tf.float32)
+          ### END YOUR CODE
 
     def add_model(self, node):
         """Recursively build the model to compute the phrase embeddings in the tree
