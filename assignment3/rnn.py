@@ -71,7 +71,7 @@ class RNN_Model():
 
         with tf.variable_scope('Composition'):
           ### YOUR CODE HERE
-          self.embedding = tf.get_variable("embedding", (vocab_size, embed_size), tf.float32)
+          self.embedding = tf.get_variable("embedding", (vocab_size, embed_size), tf.float32, trainable = True)
           self.W1 = tf.get_variable("W1", (2 * embed_size, embed_size), tf.float32)
           self.b1 = tf.get_variable("b1", (1, embed_size))
           ### YOUR CODE HERE
@@ -98,23 +98,32 @@ class RNN_Model():
             node_tensors: Dict: key = Node, value = tensor(1, embed_size)
         """
         with tf.variable_scope('Composition', reuse=True):
-            ### YOUR CODE HERE
-            pass
-            ### END YOUR CODE
-
+          ### YOUR CODE HERE
+          pass
+          ### END YOUR CODE
 
         node_tensors = dict()
         curr_node_tensor = None
         if node.isLeaf:
-            ### YOUR CODE HERE
-            pass
-            ### END YOUR CODE
+          ### YOUR CODE HERE
+          node.tensor = tf.nn.embedding_lookup(self.embedding, node.word)
+          ### END YOUR CODE
         else:
-            node_tensors.update(self.add_model(node.left))
-            node_tensors.update(self.add_model(node.right))
-            ### YOUR CODE HERE
-            pass
-            ### END YOUR CODE
+          node_tensors.update(self.add_model(node.left))
+          node_tensors.update(self.add_model(node.right))
+          ### YOUR CODE HERE
+          L1 = node.left.tensor
+          L2 = node.right.tensor
+
+          L = tf.concat((L1, L2), axis = 0)
+
+          h = tf.tanh(tf.matmul(L, self.W1) + self.b1)
+
+          node.tensor = h
+
+          curr_node_tensor = h
+          ### END YOUR CODE
+
         node_tensors[node] = curr_node_tensor
         return node_tensors
 
