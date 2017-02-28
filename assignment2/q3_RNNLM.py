@@ -103,7 +103,7 @@ class RNNLM_Model(LanguageModel):
     # The embedding lookup is currently only implemented for the CPU
     with tf.device('/cpu:0'):
       ### YOUR CODE HERE
-      word_embeddings = tf.get_variable("word_embeddings", (len(self.vocab), self.config.embed_size), tf.float32)
+      word_embeddings = tf.get_variable("word_embeddings", (len(self.vocab), self.config.embed_size), tf.float32, trainable = True)
       inputs = tf.nn.embedding_lookup(word_embeddings, self.input_placeholder)
       inputs = [tf.squeeze(x, axis = 1) for x in tf.split(inputs, self.config.num_steps, axis = 1)]
       ### END YOUR CODE
@@ -146,9 +146,11 @@ class RNNLM_Model(LanguageModel):
       loss: A 0-d tensor (scalar)
     """
     ### YOUR CODE HERE
-    weights = tf.ones((self.config.batch_size, len(self.vocab)))
+    weights = tf.ones((self.config.batch_size, self.config.num_steps))
     output = tf.reshape(output, (self.config.batch_size, self.config.num_steps, len(self.vocab)))
     loss = sequence_loss(output, self.labels_placeholder, weights)
+    tf.add_to_collection('total_loss', loss)
+    loss = tf.add_n(tf.get_collection('total_loss'))
     ### END YOUR CODE
     return loss
 
@@ -172,7 +174,8 @@ class RNNLM_Model(LanguageModel):
       train_op: The Op for training.
     """
     ### YOUR CODE HERE
-    train_op = tf.train.AdamOptimizer(self.config.lr).minimize(loss)
+    with tf.variable_scope('Optimizer', reuse = None):
+      train_op = tf.train.AdamOptimizer(self.config.lr).minimize(loss)
     ### END YOUR CODE
     return train_op
 
@@ -248,11 +251,13 @@ class RNNLM_Model(LanguageModel):
     rnn_outputs = [None] * self.config.num_steps
 
     for t in range(self.config.num_steps):
-      et = inputs[t]
+      et = tf.nn.dropout(inputs[t], self.dropout_placeholder)
       ht = tf.sigmoid(tf.matmul(ht, tf.transpose(H)) + tf.matmul(et, I) + b_1)
       rnn_outputs[t] = ht
 
     self.final_state = rnn_outputs[-1]
+
+    rnn_outputs = [tf.nn.dropout(x, self.dropout_placeholder) for x in rnn_outputs]
 
     ### END YOUR CODE
     return rnn_outputs
