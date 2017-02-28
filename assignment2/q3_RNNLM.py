@@ -80,7 +80,7 @@ class RNNLM_Model(LanguageModel):
     """
     ### YOUR CODE HERE
     self.input_placeholder = tf.placeholder(tf.int32, shape = (None, self.config.num_steps))
-    self.labels_placeholder = tf.placeholder(tf.float32, shape = (None, self.config.num_steps))
+    self.labels_placeholder = tf.placeholder(tf.int32, shape = (None, self.config.num_steps))
     self.dropout_placeholder = tf.placeholder(tf.float32)
     ### END YOUR CODE
 
@@ -131,7 +131,7 @@ class RNNLM_Model(LanguageModel):
     ### YOUR CODE HERE
     U = tf.get_variable("U", (self.config.hidden_size, len(self.vocab)), tf.float32)
     b_2 = tf.get_variable("b_2", (len(self.vocab), ), tf.float32)
-    outputs = [(tf.matmul(U, x) + b_2) for x in rnn_outputs]
+    outputs = [(tf.matmul(x, U) + b_2) for x in rnn_outputs]
     ### END YOUR CODE
     return outputs
 
@@ -146,7 +146,10 @@ class RNNLM_Model(LanguageModel):
       loss: A 0-d tensor (scalar)
     """
     ### YOUR CODE HERE
-    loss = sequence_loss(output, self.labels_placeholder)
+    with tf.variable_scope('loss', reuse = None) as scope:
+      weights = tf.ones((self.config.batch_size, len(self.vocab)))
+      output = tf.reshape(output, (self.config.batch_size, self.config.num_steps, len(self.vocab)))
+      loss = sequence_loss(output, self.labels_placeholder, weights)
     ### END YOUR CODE
     return loss
 
@@ -170,7 +173,8 @@ class RNNLM_Model(LanguageModel):
       train_op: The Op for training.
     """
     ### YOUR CODE HERE
-    train_op = tf.train.AdamOptimizer(self.config.lr).minimize(loss)
+    with tf.variable_scope('loss', reuse = None) as scope:
+      train_op = tf.train.AdamOptimizer(self.config.lr).minimize(loss)
     ### END YOUR CODE
     return train_op
 
@@ -188,7 +192,7 @@ class RNNLM_Model(LanguageModel):
     self.predictions = [tf.nn.softmax(tf.cast(o, 'float64')) for o in self.outputs]
     # Reshape the output into len(vocab) sized chunks - the -1 says as many as
     # needed to evenly divide
-    output = tf.reshape(tf.concat(1, self.outputs), [-1, len(self.vocab)])
+    output = tf.reshape(tf.concat(self.outputs, 1), [-1, len(self.vocab)])
     self.calculate_loss = self.add_loss_op(output)
     self.train_step = self.add_training_op(self.calculate_loss)
 
@@ -232,23 +236,25 @@ class RNNLM_Model(LanguageModel):
                a tensor of shape (batch_size, hidden_size)
     """
     ### YOUR CODE HERE
-    self.initial_state = tf.get_variable("initial_state",
-                                         (self.config.batch_size, self.config.hidden_size),
-                                         initializer = tf.zeros_initializer())
+    # self.initial_state = tf.get_variable("initial_state",
+    #                                      (self.config.batch_size, self.config.hidden_size),
+    #                                      initializer = tf.zeros_initializer())
+
+    self.initial_state = tf.zeros((self.config.batch_size, self.config.hidden_size))
 
     H = tf.get_variable("H", (self.config.hidden_size, self.config.hidden_size))
     I = tf.get_variable("I", (self.config.embed_size, self.config.hidden_size))
     b_1 = tf.get_variable("b_1", (self.config.hidden_size,))
 
-    ht_prev = self.initial_state
+    ht = self.initial_state
     rnn_outputs = [None] * self.config.num_steps
 
     for t in range(self.config.num_steps):
       et = inputs[t]
-      ht = tf.sigmoid(tf.matmul(H, ht_prev) + tf.matmul(I, et) + b_1)
+      ht = tf.sigmoid(tf.matmul(ht, tf.transpose(H)) + tf.matmul(et, I) + b_1)
       rnn_outputs[t] = ht
 
-      ht_prev = ht
+    self.final_state = rnn_outputs[-1]
 
     ### END YOUR CODE
     return rnn_outputs
